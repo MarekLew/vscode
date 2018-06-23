@@ -125,6 +125,7 @@ export interface IOpenConfiguration {
 	preferNewWindow?: boolean;
 	forceNewWindow?: boolean;
 	forceReuseWindow?: boolean;
+	forceBestWindow?: boolean;
 	forceEmpty?: boolean;
 	diffMode?: boolean;
 	addMode?: boolean;
