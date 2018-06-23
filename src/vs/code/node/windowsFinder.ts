@@ -32,6 +32,9 @@ export interface IBestWindowOrFolderOptions<W extends ISimpleWindow> {
 
 export function findBestWindowOrFolderForFile<W extends ISimpleWindow>({ windows, newWindow, reuseWindow, context, filePath, userHome, codeSettingsFolder, workspaceResolver }: IBestWindowOrFolderOptions<W>): W | string {
 	if (!newWindow && filePath && (context === OpenContext.DESKTOP || context === OpenContext.CLI || context === OpenContext.DOCK)) {
+		if (reuseWindow) {
+			return getLastActiveWindow(windows);
+		}
 		const windowOnFilePath = findWindowOnFilePath(windows, filePath, workspaceResolver);
 		if (windowOnFilePath) {
 			return windowOnFilePath;
