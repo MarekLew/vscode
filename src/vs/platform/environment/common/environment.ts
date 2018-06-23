@@ -20,6 +20,7 @@ export interface ParsedArgs {
 	'new-window'?: boolean;
 	'unity-launch'?: boolean; // Always open a new window, except if opening the first window or opening a file or folder as part of the launch.
 	'reuse-window'?: boolean;
+	'best-window'?: boolean;
 	locale?: string;
 	'user-data-dir'?: string;
 	performance?: boolean;

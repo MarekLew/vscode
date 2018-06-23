@@ -8,10 +8,8 @@
 	],
 	"cpu": "CPU %",
 	"memory": "메모리(MB)",
-	"pid": "PID",
+	"pid": "pid",
 	"name": "이름",
 	"killProcess": "프로세스 종료",
-	"forceKillProcess": "프로세스 강제 종료",
-	"copy": "복사",
-	"copyAll": "모두 복사"
+	"forceKillProcess": "프로세스 강제 종료"
 }

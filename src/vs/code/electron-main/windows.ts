@@ -508,6 +508,7 @@ export class WindowsManager implements IWindowsMainService {
 				windows: WindowsManager.WINDOWS,
 				newWindow: openFilesInNewWindow,
 				reuseWindow: openConfig.forceReuseWindow,
+				bestWindow: openConfig.forceBestWindow,
 				context: openConfig.context,
 				filePath: fileToCheck && fileToCheck.filePath,
 				userHome: this.environmentService.userHome,

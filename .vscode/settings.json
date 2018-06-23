@@ -41,6 +41,16 @@
 	"npm.exclude": "**/extensions/**",
 	"emmet.excludeLanguages": [],
 	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"typescript.preferences.quoteStyle": "single"
-
+	"typescript.preferences.quoteStyle": "single",
+	"favorites.sortDirection": "ASC",
+	"favorites.groupsFirst": true,
+	"favorites.root": [
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/code/node/windowsFinder.ts",
+			"parent_id": null,
+			"id": "CTxfBWDyuPhpnINU",
+			"workspacePath": "src/vs/code/node/windowsFinder.ts"
+		}
+	]
 }

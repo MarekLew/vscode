@@ -11,7 +11,5 @@
 	"pid": "PID",
 	"name": "Name",
 	"killProcess": "Prozess beenden",
-	"forceKillProcess": "Beenden des Prozesses erzwingen",
-	"copy": "Kopieren",
-	"copyAll": "Alles kopieren"
+	"forceKillProcess": "Beenden des Prozesses erzwingen"
 }
