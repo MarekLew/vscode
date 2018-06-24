@@ -350,8 +350,8 @@ export class WorkspaceStats implements IWorkbenchContribution {
 			return this.parentURI(URI.file(filesToOpen[0].filePath));
 		} else if (filesToCreate && filesToCreate.length) {
 			return this.parentURI(URI.file(filesToCreate[0].filePath));
-		} else if (filesToDiff && filesToDiff.length) {
-			return this.parentURI(URI.file(filesToDiff[0].filePath));
+		} else if (filesToDiff && filesToDiff.length > 1) {
+			return this.parentURI(URI.file(filesToDiff[1].filePath));
 		}
 		return undefined;
 	}

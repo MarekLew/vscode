@@ -503,7 +503,7 @@ export class WindowsManager implements IWindowsMainService {
 		if (potentialWindowsCount === 0 && (filesToOpen.length > 0 || filesToCreate.length > 0 || filesToDiff.length > 0)) {
 
 			// Find suitable window or folder path to open files in
-			const fileToCheck = filesToOpen[0] || filesToCreate[0] || filesToDiff[0];
+			const fileToCheck = filesToOpen[0] || filesToCreate[0] || (filesToDiff.length > 1 ? filesToDiff[1] : filesToDiff[0]);
 			let bestWindowOrFolder = findBestWindowOrFolderForFile({
 				windows: WindowsManager.WINDOWS,
 				newWindow: openFilesInNewWindow,
