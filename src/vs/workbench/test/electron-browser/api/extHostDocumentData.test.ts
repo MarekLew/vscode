@@ -9,10 +9,11 @@ import * as assert from 'assert';
 import URI from 'vs/base/common/uri';
 import { ExtHostDocumentData } from 'vs/workbench/api/node/extHostDocumentData';
 import { Position } from 'vs/workbench/api/node/extHostTypes';
-import { Range as CodeEditorRange } from 'vs/editor/common/core/range';
-import * as EditorCommon from 'vs/editor/common/editorCommon';
+import { Range } from 'vs/editor/common/core/range';
 import { MainThreadDocumentsShape } from 'vs/workbench/api/node/extHost.protocol';
 import { TPromise } from 'vs/base/common/winjs.base';
+import { IModelChangedEvent } from 'vs/editor/common/model/mirrorTextModel';
+import { mock } from 'vs/workbench/test/electron-browser/api/mock';
 
 
 suite('ExtHostDocumentData', () => {
@@ -41,18 +42,18 @@ suite('ExtHostDocumentData', () => {
 	});
 
 	test('readonly-ness', function () {
-		assert.throws(() => (<any>data).document.uri = null);
-		assert.throws(() => (<any>data).document.fileName = 'foofile');
-		assert.throws(() => (<any>data).document.isDirty = false);
-		assert.throws(() => (<any>data).document.isUntitled = false);
-		assert.throws(() => (<any>data).document.languageId = 'dddd');
-		assert.throws(() => (<any>data).document.lineCount = 9);
+		assert.throws((): void => (data as any).document.uri = null);
+		assert.throws(() => (data as any).document.fileName = 'foofile');
+		assert.throws(() => (data as any).document.isDirty = false);
+		assert.throws(() => (data as any).document.isUntitled = false);
+		assert.throws(() => (data as any).document.languageId = 'dddd');
+		assert.throws(() => (data as any).document.lineCount = 9);
 	});
 
 	test('save, when disposed', function () {
 		let saved: URI;
-		let data = new ExtHostDocumentData(new class extends MainThreadDocumentsShape {
-			$trySaveDocument(uri) {
+		let data = new ExtHostDocumentData(new class extends mock<MainThreadDocumentsShape>() {
+			$trySaveDocument(uri: URI) {
 				assert.ok(!saved);
 				saved = uri;
 				return TPromise.as(true);
@@ -97,15 +98,16 @@ suite('ExtHostDocumentData', () => {
 		assert.equal(line.isEmptyOrWhitespace, false);
 		assert.equal(line.firstNonWhitespaceCharacterIndex, 0);
 
-		data.onEvents([{
-			range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
-			text: '\t ',
+		data.onEvents({
+			changes: [{
+				range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
+				rangeOffset: undefined,
+				rangeLength: undefined,
+				text: '\t '
+			}],
 			eol: undefined,
-			isRedoing: undefined,
-			isUndoing: undefined,
 			versionId: undefined,
-			rangeLength: undefined,
-		}]);
+		});
 
 		// line didn't change
 		assert.equal(line.text, 'This is line one');
@@ -153,15 +155,16 @@ suite('ExtHostDocumentData', () => {
 
 	test('offsetAt, after remove', function () {
 
-		data.onEvents([{
-			range: { startLineNumber: 1, startColumn: 3, endLineNumber: 1, endColumn: 6 },
-			text: '',
+		data.onEvents({
+			changes: [{
+				range: { startLineNumber: 1, startColumn: 3, endLineNumber: 1, endColumn: 6 },
+				rangeOffset: undefined,
+				rangeLength: undefined,
+				text: ''
+			}],
 			eol: undefined,
-			isRedoing: undefined,
-			isUndoing: undefined,
 			versionId: undefined,
-			rangeLength: undefined,
-		}]);
+		});
 
 		assertOffsetAt(0, 1, 1);
 		assertOffsetAt(0, 13, 13);
@@ -170,15 +173,16 @@ suite('ExtHostDocumentData', () => {
 
 	test('offsetAt, after replace', function () {
 
-		data.onEvents([{
-			range: { startLineNumber: 1, startColumn: 3, endLineNumber: 1, endColumn: 6 },
-			text: 'is could be',
+		data.onEvents({
+			changes: [{
+				range: { startLineNumber: 1, startColumn: 3, endLineNumber: 1, endColumn: 6 },
+				rangeOffset: undefined,
+				rangeLength: undefined,
+				text: 'is could be'
+			}],
 			eol: undefined,
-			isRedoing: undefined,
-			isUndoing: undefined,
 			versionId: undefined,
-			rangeLength: undefined,
-		}]);
+		});
 
 		assertOffsetAt(0, 1, 1);
 		assertOffsetAt(0, 24, 24);
@@ -187,15 +191,16 @@ suite('ExtHostDocumentData', () => {
 
 	test('offsetAt, after insert line', function () {
 
-		data.onEvents([{
-			range: { startLineNumber: 1, startColumn: 3, endLineNumber: 1, endColumn: 6 },
-			text: 'is could be\na line with number',
+		data.onEvents({
+			changes: [{
+				range: { startLineNumber: 1, startColumn: 3, endLineNumber: 1, endColumn: 6 },
+				rangeOffset: undefined,
+				rangeLength: undefined,
+				text: 'is could be\na line with number'
+			}],
 			eol: undefined,
-			isRedoing: undefined,
-			isUndoing: undefined,
 			versionId: undefined,
-			rangeLength: undefined,
-		}]);
+		});
 
 		assertOffsetAt(0, 1, 1);
 		assertOffsetAt(0, 13, 13);
@@ -207,15 +212,16 @@ suite('ExtHostDocumentData', () => {
 
 	test('offsetAt, after remove line', function () {
 
-		data.onEvents([{
-			range: { startLineNumber: 1, startColumn: 3, endLineNumber: 2, endColumn: 6 },
-			text: '',
+		data.onEvents({
+			changes: [{
+				range: { startLineNumber: 1, startColumn: 3, endLineNumber: 2, endColumn: 6 },
+				rangeOffset: undefined,
+				rangeLength: undefined,
+				text: ''
+			}],
 			eol: undefined,
-			isRedoing: undefined,
-			isUndoing: undefined,
 			versionId: undefined,
-			rangeLength: undefined,
-		}]);
+		});
 
 		assertOffsetAt(0, 1, 1);
 		assertOffsetAt(0, 2, 2);
@@ -269,6 +275,34 @@ suite('ExtHostDocumentData', () => {
 		range = data.document.getWordRangeAtPosition(new Position(0, 11), /yy/);
 		assert.equal(range, undefined);
 	});
+
+	test('getWordRangeAtPosition doesn\'t quite use the regex as expected, #29102', function () {
+		data = new ExtHostDocumentData(undefined, URI.file(''), [
+			'some text here',
+			'/** foo bar */',
+			'function() {',
+			'	"far boo"',
+			'}'
+		], '\n', 'text', 1, false);
+
+		let range = data.document.getWordRangeAtPosition(new Position(0, 0), /\/\*.+\*\//);
+		assert.equal(range, undefined);
+
+		range = data.document.getWordRangeAtPosition(new Position(1, 0), /\/\*.+\*\//);
+		assert.equal(range.start.line, 1);
+		assert.equal(range.start.character, 0);
+		assert.equal(range.end.line, 1);
+		assert.equal(range.end.character, 14);
+
+		range = data.document.getWordRangeAtPosition(new Position(3, 0), /("|').*\1/);
+		assert.equal(range, undefined);
+
+		range = data.document.getWordRangeAtPosition(new Position(3, 1), /("|').*\1/);
+		assert.equal(range.start.line, 3);
+		assert.equal(range.start.character, 1);
+		assert.equal(range.end.line, 3);
+		assert.equal(range.end.character, 10);
+	});
 });
 
 enum AssertDocumentLineMappingDirection {
@@ -311,32 +345,33 @@ suite('ExtHostDocumentData updates line mapping', () => {
 		}
 	}
 
-	function createChangeEvent(range: CodeEditorRange, text: string, eol?: string): EditorCommon.IModelContentChangedEvent2 {
+	function createChangeEvent(range: Range, text: string, eol?: string): IModelChangedEvent {
 		return {
-			range: range,
-			text: text,
+			changes: [{
+				range: range,
+				rangeOffset: undefined,
+				rangeLength: undefined,
+				text: text
+			}],
 			eol: eol,
-			isRedoing: undefined,
-			isUndoing: undefined,
 			versionId: undefined,
-			rangeLength: undefined,
 		};
 	}
 
-	function testLineMappingDirectionAfterEvents(lines: string[], eol: string, direction: AssertDocumentLineMappingDirection, events: EditorCommon.IModelContentChangedEvent2[]): void {
+	function testLineMappingDirectionAfterEvents(lines: string[], eol: string, direction: AssertDocumentLineMappingDirection, e: IModelChangedEvent): void {
 		let myDocument = new ExtHostDocumentData(undefined, URI.file(''), lines.slice(0), eol, 'text', 1, false);
 		assertDocumentLineMapping(myDocument, direction);
 
-		myDocument.onEvents(events);
+		myDocument.onEvents(e);
 		assertDocumentLineMapping(myDocument, direction);
 	}
 
-	function testLineMappingAfterEvents(lines: string[], events: EditorCommon.IModelContentChangedEvent2[]): void {
-		testLineMappingDirectionAfterEvents(lines, '\n', AssertDocumentLineMappingDirection.PositionToOffset, events);
-		testLineMappingDirectionAfterEvents(lines, '\n', AssertDocumentLineMappingDirection.OffsetToPosition, events);
+	function testLineMappingAfterEvents(lines: string[], e: IModelChangedEvent): void {
+		testLineMappingDirectionAfterEvents(lines, '\n', AssertDocumentLineMappingDirection.PositionToOffset, e);
+		testLineMappingDirectionAfterEvents(lines, '\n', AssertDocumentLineMappingDirection.OffsetToPosition, e);
 
-		testLineMappingDirectionAfterEvents(lines, '\r\n', AssertDocumentLineMappingDirection.PositionToOffset, events);
-		testLineMappingDirectionAfterEvents(lines, '\r\n', AssertDocumentLineMappingDirection.OffsetToPosition, events);
+		testLineMappingDirectionAfterEvents(lines, '\r\n', AssertDocumentLineMappingDirection.PositionToOffset, e);
+		testLineMappingDirectionAfterEvents(lines, '\r\n', AssertDocumentLineMappingDirection.OffsetToPosition, e);
 	}
 
 	test('line mapping', () => {
@@ -345,7 +380,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], []);
+		], { changes: [], eol: undefined, versionId: 7 });
 	});
 
 	test('after remove', () => {
@@ -354,7 +389,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 1, 6), '')]);
+		], createChangeEvent(new Range(1, 3, 1, 6), ''));
 	});
 
 	test('after replace', () => {
@@ -363,7 +398,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 1, 6), 'is could be')]);
+		], createChangeEvent(new Range(1, 3, 1, 6), 'is could be'));
 	});
 
 	test('after insert line', () => {
@@ -372,7 +407,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 1, 6), 'is could be\na line with number')]);
+		], createChangeEvent(new Range(1, 3, 1, 6), 'is could be\na line with number'));
 	});
 
 	test('after insert two lines', () => {
@@ -381,7 +416,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 1, 6), 'is could be\na line with number\nyet another line')]);
+		], createChangeEvent(new Range(1, 3, 1, 6), 'is could be\na line with number\nyet another line'));
 	});
 
 	test('after remove line', () => {
@@ -390,7 +425,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 2, 6), '')]);
+		], createChangeEvent(new Range(1, 3, 2, 6), ''));
 	});
 
 	test('after remove two lines', () => {
@@ -399,7 +434,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 3, 6), '')]);
+		], createChangeEvent(new Range(1, 3, 3, 6), ''));
 	});
 
 	test('after deleting entire content', () => {
@@ -408,7 +443,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 4, 30), '')]);
+		], createChangeEvent(new Range(1, 3, 4, 30), ''));
 	});
 
 	test('after replacing entire content', () => {
@@ -417,7 +452,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 3, 4, 30), 'some new text\nthat\nspans multiple lines')]);
+		], createChangeEvent(new Range(1, 3, 4, 30), 'some new text\nthat\nspans multiple lines'));
 	});
 
 	test('after changing EOL to CRLF', () => {
@@ -426,7 +461,7 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 1, 1, 1), '', '\r\n')]);
+		], createChangeEvent(new Range(1, 1, 1, 1), '', '\r\n'));
 	});
 
 	test('after changing EOL to LF', () => {
@@ -435,6 +470,6 @@ suite('ExtHostDocumentData updates line mapping', () => {
 			'and this is line number two',
 			'it is followed by #3',
 			'and finished with the fourth.',
-		], [createChangeEvent(new CodeEditorRange(1, 1, 1, 1), '', '\n')]);
+		], createChangeEvent(new Range(1, 1, 1, 1), '', '\n'));
 	});
 });

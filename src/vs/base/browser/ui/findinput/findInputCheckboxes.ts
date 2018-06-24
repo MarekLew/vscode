@@ -4,19 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 'use strict';
 
-import 'vs/css!./findInputCheckboxes';
-
-import * as nls from 'vs/nls';
 import { Checkbox } from 'vs/base/browser/ui/checkbox/checkbox';
-import { IKeyboardEvent } from 'vs/base/browser/keyboardEvent';
-import { Color } from "vs/base/common/color";
+import { Color } from 'vs/base/common/color';
+import 'vs/css!./findInputCheckboxes';
+import * as nls from 'vs/nls';
 
 export interface IFindInputCheckboxOpts {
-	appendTitle: string;
-	isChecked: boolean;
-	onChange: (viaKeyboard: boolean) => void;
-	onKeyDown?: (e: IKeyboardEvent) => void;
-	inputActiveOptionBorderColor?: Color;
+	readonly appendTitle: string;
+	readonly isChecked: boolean;
+	readonly inputActiveOptionBorder?: Color;
 }
 
 const NLS_CASE_SENSITIVE_CHECKBOX_LABEL = nls.localize('caseDescription', "Match Case");
@@ -29,9 +25,7 @@ export class CaseSensitiveCheckbox extends Checkbox {
 			actionClassName: 'monaco-case-sensitive',
 			title: NLS_CASE_SENSITIVE_CHECKBOX_LABEL + opts.appendTitle,
 			isChecked: opts.isChecked,
-			onChange: opts.onChange,
-			onKeyDown: opts.onKeyDown,
-			inputActiveOptionBorderColor: opts.inputActiveOptionBorderColor
+			inputActiveOptionBorder: opts.inputActiveOptionBorder
 		});
 	}
 }
@@ -42,9 +36,7 @@ export class WholeWordsCheckbox extends Checkbox {
 			actionClassName: 'monaco-whole-word',
 			title: NLS_WHOLE_WORD_CHECKBOX_LABEL + opts.appendTitle,
 			isChecked: opts.isChecked,
-			onChange: opts.onChange,
-			onKeyDown: opts.onKeyDown,
-			inputActiveOptionBorderColor: opts.inputActiveOptionBorderColor
+			inputActiveOptionBorder: opts.inputActiveOptionBorder
 		});
 	}
 }
@@ -55,9 +47,7 @@ export class RegexCheckbox extends Checkbox {
 			actionClassName: 'monaco-regex',
 			title: NLS_REGEX_CHECKBOX_LABEL + opts.appendTitle,
 			isChecked: opts.isChecked,
-			onChange: opts.onChange,
-			onKeyDown: opts.onKeyDown,
-			inputActiveOptionBorderColor: opts.inputActiveOptionBorderColor
+			inputActiveOptionBorder: opts.inputActiveOptionBorder
 		});
 	}
 }
