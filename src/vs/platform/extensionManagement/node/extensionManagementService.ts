@@ -103,10 +103,6 @@ interface InstallableExtension {
 	metadata?: IGalleryMetadata;
 }
 
-enum InstallOperation {
-	Install = 1,
-	Update
-}
 
 export class ExtensionManagementService extends Disposable implements IExtensionManagementService {
 

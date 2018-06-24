@@ -502,13 +502,6 @@ declare module 'vscode' {
 		export function registerWebviewPanelSerializer(viewType: string, serializer: WebviewPanelSerializer): Disposable;
 	}
 
-	//#endregion
-
-	//#region Joh -> exclusive document filters
-
-	export interface DocumentFilter {
-		exclusive?: boolean;
-	}
 
 	//#endregion
 }
