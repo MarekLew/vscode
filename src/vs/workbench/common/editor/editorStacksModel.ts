@@ -533,7 +533,7 @@ export class EditorGroup implements IEditorGroup {
 		}
 	}
 
-	private splice(index: number, del: boolean, editor?: EditorInput): void {
+	private splice(index: number, del: boolean, editor?: EditorInput | SideBySideEditorInput): void {
 		const editorToDeleteOrReplace = this.editors[index];
 
 		const args: any[] = [index, del ? 1 : 0];
@@ -569,7 +569,10 @@ export class EditorGroup implements IEditorGroup {
 		}
 	}
 
-	private updateResourceMap(editor: EditorInput, remove: boolean): void {
+	private updateResourceMap(editor: EditorInput | SideBySideEditorInput, remove: boolean): void {
+		if (editor instanceof SideBySideEditorInput) {
+			this.updateResourceMap(editor.details, remove);
+		}
 		const resource = toResource(editor, { supportSideBySide: true });
 		if (resource) {
 
@@ -1221,6 +1224,7 @@ export class EditorStacksModel implements IEditorStacksModel {
 
 		// Close the editor when it is no longer open in any group including diff editors
 		editorsToClose.forEach(editorToClose => {
+
 			const resource = editorToClose ? editorToClose.getResource() : void 0; // prefer resource to not close right-hand side editors of a diff editor
 			if (!this.isOpen(resource || editorToClose)) {
 				editorToClose.close();
