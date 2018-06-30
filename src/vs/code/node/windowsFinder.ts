@@ -23,6 +23,7 @@ export interface IBestWindowOrFolderOptions<W extends ISimpleWindow> {
 	windows: W[];
 	newWindow: boolean;
 	reuseWindow: boolean;
+	bestWindow: boolean;
 	context: OpenContext;
 	filePath?: string;
 	userHome?: string;
@@ -30,14 +31,29 @@ export interface IBestWindowOrFolderOptions<W extends ISimpleWindow> {
 	workspaceResolver: (workspace: IWorkspaceIdentifier) => IResolvedWorkspace;
 }
 
-export function findBestWindowOrFolderForFile<W extends ISimpleWindow>({ windows, newWindow, reuseWindow, context, filePath, workspaceResolver }: IBestWindowOrFolderOptions<W>): W | string {
-	if (!newWindow && filePath && (context === OpenContext.DESKTOP || context === OpenContext.CLI || context === OpenContext.DOCK)) {
+export function findBestWindowOrFolderForFile<W extends ISimpleWindow>({ windows, newWindow, reuseWindow, bestWindow, context, filePath, workspaceResolver }: IBestWindowOrFolderOptions<W>): W | string {
+	if (filePath && (context === OpenContext.DESKTOP || context === OpenContext.CLI || context === OpenContext.DOCK)) {
+		if (newWindow && !bestWindow) {
+			return null;//no search best
+		}
+		if (reuseWindow && !bestWindow) {
+			return getLastActiveWindow(windows);//no search best
+		}
+		//search best window
 		const windowOnFilePath = findWindowOnFilePath(windows, filePath, workspaceResolver);
 		if (windowOnFilePath) {
 			return windowOnFilePath;
 		}
+		if (reuseWindow && bestWindow) {
+			//if not find best, return last
+			return getLastActiveWindow(windows);
+		}
+		if (newWindow && bestWindow) {
+			//if not find best, return new
+			return null;
+		}
 	}
-
+	//newWindow is not oposite to reuseWindow
 	return !newWindow ? getLastActiveWindow(windows) : null;
 }
 

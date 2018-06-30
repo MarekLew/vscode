@@ -483,7 +483,7 @@ export class EditorGroup extends Disposable {
 		return !this.matches(this.preview, editor);
 	}
 
-	private splice(index: number, del: boolean, editor?: EditorInput): void {
+	private splice(index: number, del: boolean, editor?: EditorInput | SideBySideEditorInput): void {
 		const editorToDeleteOrReplace = this.editors[index];
 
 		const args: any[] = [index, del ? 1 : 0];
@@ -519,7 +519,10 @@ export class EditorGroup extends Disposable {
 		}
 	}
 
-	private updateResourceMap(editor: EditorInput, remove: boolean): void {
+	private updateResourceMap(editor: EditorInput | SideBySideEditorInput, remove: boolean): void {
+		if (editor instanceof SideBySideEditorInput) {
+			this.updateResourceMap(editor.details, remove);
+		}
 		const resource = toResource(editor, { supportSideBySide: true });
 		if (resource) {
 
