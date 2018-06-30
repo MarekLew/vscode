@@ -41,6 +41,99 @@
 	"npm.exclude": "**/extensions/**",
 	"emmet.excludeLanguages": [],
 	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"typescript.preferences.quoteStyle": "single"
-
+	"typescript.preferences.quoteStyle": "single",
+	"favorites.root": [
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/workbench/electron-browser/workbench.ts",
+			"parent_id": null,
+			"id": "ECKkZa6FOs0LAbNd",
+			"workspacePath": "src/vs/workbench/electron-browser/workbench.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/workbench/electron-browser/window.ts",
+			"parent_id": null,
+			"id": "V1jznahBkmDqHSO3",
+			"workspacePath": "src/vs/workbench/electron-browser/window.ts"
+		},
+		{
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/workbench/electron-browser/workbench.ts",
+			"parent_id": null,
+			"id": "tGX5gfxZvrADmROC"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/workbench/parts/stats/node/workspaceStats.ts",
+			"parent_id": null,
+			"id": "7S69NmZvKUXCjplI",
+			"workspacePath": "src/vs/workbench/parts/stats/node/workspaceStats.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/code/electron-main/windows.ts",
+			"parent_id": null,
+			"id": "bI4XlSdtwkTqOoCu",
+			"workspacePath": "src/vs/code/electron-main/windows.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/workbench/services/files/node/watcher/unix/test/chockidarWatcherService.test.ts",
+			"parent_id": null,
+			"id": "pwANHt7JFfI24KbG",
+			"workspacePath": "src/vs/workbench/services/files/node/watcher/unix/test/chockidarWatcherService.test.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/code/electron-main/launch.ts",
+			"parent_id": null,
+			"id": "lVm5B3T0EzgLoSdv",
+			"workspacePath": "src/vs/code/electron-main/launch.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/workbench/electron-browser/commands.ts",
+			"parent_id": null,
+			"id": "nm93bhWzDqYXd7Mc",
+			"workspacePath": "src/vs/workbench/electron-browser/commands.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/editor/standalone/browser/simpleServices.ts",
+			"parent_id": null,
+			"id": "4v5GgXVyksx2rpTQ",
+			"workspacePath": "src/vs/editor/standalone/browser/simpleServices.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/workbench/test/workbenchTestServices.ts",
+			"parent_id": null,
+			"id": "vQjqPFCtVSDuem5X",
+			"workspacePath": "src/vs/workbench/test/workbenchTestServices.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/out/vs/workbench/services/extensions/electron-browser/extensionHost.js",
+			"parent_id": null,
+			"id": "ud3iz9bTU1qwSsYv",
+			"workspacePath": "out/vs/workbench/services/extensions/electron-browser/extensionHost.js"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/platform/extensionManagement/node/extensionManagementService.ts",
+			"parent_id": null,
+			"id": "dYICvG4LrnMBgDU5",
+			"workspacePath": "src/vs/platform/extensionManagement/node/extensionManagementService.ts"
+		},
+		{
+			"type": "File",
+			"name": "/home/marek/Pulpit/vsc/vscode/src/vs/vscode.proposed.d.ts",
+			"parent_id": null,
+			"id": "ZjFWRvVLYfzNPXBs",
+			"workspacePath": "src/vs/vscode.proposed.d.ts"
+		}
+	],
+	"favorites.sortDirection": "ASC",
+	"favorites.groupsFirst": true,
+	"editor.minimap.enabled": false
 }
