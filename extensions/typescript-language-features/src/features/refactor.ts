@@ -4,13 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 import * as Proto from '../protocol';
 import { ITypeScriptServiceClient } from '../typescriptService';
 import API from '../utils/api';
+import { nulToken } from '../utils/cancellation';
 import { Command, CommandManager } from '../utils/commandManager';
 import { VersionDependentRegistration } from '../utils/dependentRegistration';
+import TelemetryReporter from '../utils/telemetry';
 import * as typeConverters from '../utils/typeConverters';
 import FormattingOptionsManager from './fileConfigurationManager';
+
+const localize = nls.loadMessageBundle();
 
 
 class ApplyRefactoringCommand implements Command {
@@ -18,7 +23,8 @@ class ApplyRefactoringCommand implements Command {
 	public readonly id = ApplyRefactoringCommand.ID;
 
 	constructor(
-		private readonly client: ITypeScriptServiceClient
+		private readonly client: ITypeScriptServiceClient,
+		private readonly telemetryReporter: TelemetryReporter
 	) { }
 
 	public async execute(
@@ -28,23 +34,39 @@ class ApplyRefactoringCommand implements Command {
 		action: string,
 		range: vscode.Range
 	): Promise<boolean> {
+		/* __GDPR__
+			"refactor.execute" : {
+				"action" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" },
+				"${include}": [
+					"${TypeScriptCommonProperties}"
+				]
+			}
+		*/
+		this.telemetryReporter.logTelemetry('refactor.execute', {
+			action: action,
+		});
+
 		const args: Proto.GetEditsForRefactorRequestArgs = {
 			...typeConverters.Range.toFileRangeRequestArgs(file, range),
 			refactor,
-			action
+			action,
 		};
-		const response = await this.client.execute('getEditsForRefactor', args);
-		const body = response && response.body;
-		if (!body || !body.edits.length) {
+		const response = await this.client.execute('getEditsForRefactor', args, nulToken);
+		if (response.type !== 'response' || !response.body) {
 			return false;
 		}
 
-		const workspaceEdit = await this.toWorkspaceEdit(body);
+		if (!response.body.edits.length) {
+			vscode.window.showErrorMessage(localize('refactoringFailed', "Could not apply refactoring"));
+			return false;
+		}
+
+		const workspaceEdit = await this.toWorkspaceEdit(response.body);
 		if (!(await vscode.workspace.applyEdit(workspaceEdit))) {
 			return false;
 		}
 
-		const renameLocation = body.renameLocation;
+		const renameLocation = response.body.renameLocation;
 		if (renameLocation) {
 			await vscode.commands.executeCommand('editor.action.rename', [
 				document.uri,
@@ -80,7 +102,7 @@ class SelectRefactorCommand implements Command {
 	): Promise<boolean> {
 		const selected = await vscode.window.showQuickPick(info.actions.map((action): vscode.QuickPickItem => ({
 			label: action.name,
-			description: action.description
+			description: action.description,
 		})));
 		if (!selected) {
 			return false;
@@ -90,6 +112,8 @@ class SelectRefactorCommand implements Command {
 }
 
 class TypeScriptRefactorProvider implements vscode.CodeActionProvider {
+	public static readonly minVersion = API.v240;
+
 	private static readonly extractFunctionKind = vscode.CodeActionKind.RefactorExtract.append('function');
 	private static readonly extractConstantKind = vscode.CodeActionKind.RefactorExtract.append('constant');
 	private static readonly moveKind = vscode.CodeActionKind.Refactor.append('move');
@@ -97,14 +121,15 @@ class TypeScriptRefactorProvider implements vscode.CodeActionProvider {
 	constructor(
 		private readonly client: ITypeScriptServiceClient,
 		private readonly formattingOptionsManager: FormattingOptionsManager,
-		commandManager: CommandManager
+		commandManager: CommandManager,
+		telemetryReporter: TelemetryReporter
 	) {
-		const doRefactoringCommand = commandManager.register(new ApplyRefactoringCommand(this.client));
+		const doRefactoringCommand = commandManager.register(new ApplyRefactoringCommand(this.client, telemetryReporter));
 		commandManager.register(new SelectRefactorCommand(doRefactoringCommand));
 	}
 
 	public static readonly metadata: vscode.CodeActionProviderMetadata = {
-		providedCodeActionKinds: [vscode.CodeActionKind.Refactor]
+		providedCodeActionKinds: [vscode.CodeActionKind.Refactor],
 	};
 
 	public async provideCodeActions(
@@ -117,21 +142,18 @@ class TypeScriptRefactorProvider implements vscode.CodeActionProvider {
 			return undefined;
 		}
 
-		const file = this.client.toPath(document.uri);
+		const file = this.client.toOpenedFilePath(document);
 		if (!file) {
 			return undefined;
 		}
 
-		await this.formattingOptionsManager.ensureConfigurationForDocument(document, undefined);
-
 		const args: Proto.GetApplicableRefactorsRequestArgs = typeConverters.Range.toFileRangeRequestArgs(file, rangeOrSelection);
-		let response: Proto.GetApplicableRefactorsResponse;
-		try {
-			response = await this.client.execute('getApplicableRefactors', args, token);
-			if (!response || !response.body) {
-				return undefined;
-			}
-		} catch {
+		const response = await this.client.interruptGetErr(() => {
+			this.formattingOptionsManager.ensureConfigurationForDocument(document, token);
+
+			return this.client.execute('getApplicableRefactors', args, token);
+		});
+		if (response.type !== 'response' || !response.body) {
 			return undefined;
 		}
 
@@ -176,6 +198,7 @@ class TypeScriptRefactorProvider implements vscode.CodeActionProvider {
 			command: ApplyRefactoringCommand.ID,
 			arguments: [document, file, info.name, action.name, rangeOrSelection],
 		};
+		codeAction.isPreferred = TypeScriptRefactorProvider.isPreferred(action);
 		return codeAction;
 	}
 
@@ -197,6 +220,15 @@ class TypeScriptRefactorProvider implements vscode.CodeActionProvider {
 		}
 		return vscode.CodeActionKind.Refactor;
 	}
+
+	private static isPreferred(
+		action: Proto.RefactorActionInfo
+	): boolean {
+		if (action.name.startsWith('constant_')) {
+			return action.name.endsWith('scope_0');
+		}
+		return false;
+	}
 }
 
 export function register(
@@ -204,10 +236,11 @@ export function register(
 	client: ITypeScriptServiceClient,
 	formattingOptionsManager: FormattingOptionsManager,
 	commandManager: CommandManager,
+	telemetryReporter: TelemetryReporter,
 ) {
-	return new VersionDependentRegistration(client, API.v240, () => {
+	return new VersionDependentRegistration(client, TypeScriptRefactorProvider.minVersion, () => {
 		return vscode.languages.registerCodeActionsProvider(selector,
-			new TypeScriptRefactorProvider(client, formattingOptionsManager, commandManager),
+			new TypeScriptRefactorProvider(client, formattingOptionsManager, commandManager, telemetryReporter),
 			TypeScriptRefactorProvider.metadata);
 	});
 }
